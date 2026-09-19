@@ -1,0 +1,19 @@
+# Virtual environment
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# SQLite database
+data/*.db
+
+# Generated exports
+exports/
+
+# Generated charts
+charts/
+
+# Environment variables
+.env

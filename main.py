@@ -1,26 +1,5 @@
 from database import create_tables
-from services import (
-    add_farmer,
-    view_farmers,
-    search_farmer,
-    update_farmer,
-    delete_farmer,
-    add_field,
-    view_fields,
-    search_fields,
-    update_field,
-    delete_field,
-    add_crop_plan,
-    view_crop_plans,
-    search_crop_plans,
-    update_crop_plan,
-    delete_crop_plan,
-    add_activity,
-    view_activities,
-    search_activities,
-    update_activity,
-    delete_activity,
-)
+import services
 
 
 #! Displays the main menu of the application
@@ -100,21 +79,56 @@ def display_activity_menu():
     print("\n" + "-" * 40)
 
 
+#! Displays options available under Expense Management
+def expense_management_menu():
+    print("\n" + "-" * 40)
+    print("\n>>> EXPENSE MANAGEMENT <<<")
+    print("\n" + "-" * 40)
+
+    print("1. Add Expense")
+    print("2. View Expenses")
+    print("3. Search Expense")
+    print("4. Update Expense")
+    print("5. Delete Expense")
+    print("6. Back")
+    print("\n" + "-" * 40)
+
+
+#! Displays options available under Harvest and Revenue Management
+def harvest_revenue_menu():
+    while True:
+        print("\n===== HARVEST AND REVENUE =====")
+        print("1. Harvest Management")
+        print("2. Revenue Management")
+        print("3. Back to Main Menu")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            harvest_management()
+        elif choice == "2":
+            revenue_management()
+        elif choice == "3":
+            break
+        else:
+            print("\nInvalid choice. Please try again.")
+
+
 #! Handles all Farmer Management operations
 def farmer_management():
     while True:
         display_farmer_menu()
         choice = input("Enter your choice: ")
         if choice == "1":
-            add_farmer()
+            services.add_farmer()
         elif choice == "2":
-            view_farmers()
+            services.view_farmers()
         elif choice == "3":
-            search_farmer()
+            services.search_farmer()
         elif choice == "4":
-            update_farmer()
+            services.update_farmer()
         elif choice == "5":
-            delete_farmer()
+            services.delete_farmer()
         elif choice == "6":
             print("\nReturning to Main Menu...")
             break
@@ -129,15 +143,15 @@ def field_management():
 
         choice = input("Enter your choice: ")
         if choice == "1":
-            add_field()
+            services.add_field()
         elif choice == "2":
-            view_fields()
+            services.view_fields()
         elif choice == "3":
-            search_fields()
+            services.search_fields()
         elif choice == "4":
-            update_field()
+            services.update_field()
         elif choice == "5":
-            delete_field()
+            services.delete_field()
         elif choice == "6":
             print("\nReturning to Main Menu...")
             break
@@ -152,45 +166,123 @@ def crop_planning():
         choice = input("Enter Your Choice: ").strip()
 
         if choice == "1":
-            add_crop_plan()
+            services.add_crop_plan()
         elif choice == "2":
-            view_crop_plans()
+            services.view_crop_plans()
         elif choice == "3":
-            search_crop_plans()
+            services.search_crop_plans()
         elif choice == "4":
-            update_crop_plan()
+            services.update_crop_plan()
         elif choice == "5":
-            delete_crop_plan()
+            services.delete_crop_plan()
         elif choice == "6":
             print("\nReturning to Main Menu.......")
             break
         else:
-            print("\nThis feature will be added soon.")
+            print("\nInvalid choice. Please select a number from 1 to 6.")
 
 
 #! Handles all Farming Activities operations
-
-
 def farming_activities():
     while True:
         display_activity_menu()
         choice = input("Enter your choice: ").strip()
 
         if choice == "1":
-            add_activity()
+            services.add_activity()
         elif choice == "2":
-            view_activities()
+            services.view_activities()
         elif choice == "3":
-            search_activities()
+            services.search_activities()
         elif choice == "4":
-            update_activity()
+            services.update_activity()
         elif choice == "5":
-            delete_activity()
+            services.delete_activity()
         elif choice == "6":
             print("\nReturning to Main Menu...")
             break
         else:
-            print("\nThis option is not available yet.")
+            print("\nInvalid choice. Please enter a number from 1 to 6.")
+
+
+#! Handles all Expense Management operations
+def expense_management():
+    while True:
+        expense_management_menu()
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            services.add_expense()
+        elif choice == "2":
+            services.view_expenses()
+        elif choice == "3":
+            services.search_expense()
+        elif choice == "4":
+            services.update_expense()
+        elif choice == "5":
+            services.delete_expense()
+        elif choice == "6":
+            break
+        else:
+            print("\nInvalid choice. Please enter a number from 1 to 6.")
+
+
+#! Handles all Harvest Management operations
+def harvest_management():
+    while True:
+        print("\n===== HARVEST MANAGEMENT =====")
+        print("1. Add Harvest")
+        print("2. View Harvests")
+        print("3. Search Harvest")
+        print("4. Update Harvest")
+        print("5. Delete Harvest")
+        print("6. Back")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            services.add_harvest()
+        elif choice == "2":
+            services.view_harvests()
+        elif choice == "3":
+            services.search_harvest()
+        elif choice == "4":
+            services.update_harvest()
+        elif choice == "5":
+            services.delete_harvest()
+        elif choice == "6":
+            break
+        else:
+            print("\nInvalid choice. Please try again.")
+
+
+#! Handles all Revenue Management operations
+def revenue_management():
+    while True:
+        print("\n===== REVENUE MANAGEMENT =====")
+        print("1. Add Revenue")
+        print("2. View Revenues")
+        print("3. Search Revenue")
+        print("4. Update Revenue")
+        print("5. Delete Revenue")
+        print("6. Back")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            services.add_revenue()
+        elif choice == "2":
+            services.view_revenues()
+        elif choice == "3":
+            services.search_revenue()
+        elif choice == "4":
+            services.update_revenue()
+        elif choice == "5":
+            services.delete_revenue()
+        elif choice == "6":
+            break
+        else:
+            print("\nInvalid choice. Please try again.")
 
 
 #! Starts the application and controls the main menu flow
@@ -209,9 +301,9 @@ def main():
         elif choice == "4":
             farming_activities()
         elif choice == "5":
-            print("\n>>> EXPENSE MANAGEMENT SELECTED <<<")
+            expense_management()
         elif choice == "6":
-            print("\n>>> HARVEST AND REVENUE SELECTED <<<")
+            harvest_revenue_menu()
         elif choice == "7":
             print("\n>>> REPORTS AND ANALYSIS SELECTED <<<")
         elif choice == "8":

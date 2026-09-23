@@ -1,4 +1,6 @@
 from datetime import datetime
+
+
 # Gets text input and ensures that it is not empty
 def get_non_empty_input(prompt):
     while True:
@@ -51,6 +53,19 @@ def get_positive_number(prompt):
             print("Please enter a valid number.")
 
 
+def get_positive_integer(prompt):
+    while True:
+        value = get_non_empty_input(prompt)
+
+        if value.isdigit():
+            number = int(value)
+
+            if number > 0:
+                return number
+
+        print("Please enter a valid positive number.")
+
+
 # Gets text input and ensures it contains at least one letter
 def get_text_input(prompt):
     while True:
@@ -78,10 +93,11 @@ def get_choice(prompt, choices):
 
         print("Please select a valid option.")
 
+
 # Gets and validates a date in YYYY-MM-DD format
 def get_date(prompt):
     while True:
-        date= get_non_empty_input(prompt)
+        date = get_non_empty_input(prompt)
         try:
             datetime.strptime(date, "%Y-%m-%d")
             return date

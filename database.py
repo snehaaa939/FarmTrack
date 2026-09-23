@@ -25,7 +25,7 @@ def create_tables():
         name TEXT NOT NULL,
         phone TEXT NOT NULL UNIQUE,
         location TEXT NOT NULL,
-        created at TEXT DEFAULT CURRENT_TIMESTAMP)
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP)
     """)
 
     cursor.execute("""
@@ -64,6 +64,43 @@ def create_tables():
             REFERENCES crop_plans(crop_id)
             ON DELETE CASCADE
     )""")
-
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS expenses (
+            expense_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            crop_id INTEGER NOT NULL,
+            expense_type TEXT NOT NULL,
+            amount REAL NOT NULL,
+            expense_date TEXT NOT NULL,
+            description TEXT,
+            FOREIGN KEY (crop_id)
+                REFERENCES crop_plans(crop_id)
+                ON DELETE CASCADE
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS harvests (
+            harvest_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            crop_id INTEGER NOT NULL,
+            harvest_date TEXT NOT NULL,
+            quantity REAL NOT NULL,
+            unit TEXT NOT NULL,
+            FOREIGN KEY (crop_id)
+                REFERENCES crop_plans(crop_id)
+                ON DELETE CASCADE
+        )
+    """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS revenues (
+        revenue_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        crop_id INTEGER NOT NULL,
+        sale_date TEXT NOT NULL,
+        quantity REAL NOT NULL,
+        price_per_unit REAL NOT NULL,
+        total_amount REAL NOT NULL,
+        FOREIGN KEY (crop_id)
+            REFERENCES crop_plans(crop_id)
+            ON DELETE CASCADE
+    )
+""")
     connection.commit()
     connection.close()

@@ -1,5 +1,7 @@
 from database import create_tables
 import services
+import reports
+import validators
 
 
 #! Displays the main menu of the application
@@ -112,6 +114,21 @@ def harvest_revenue_menu():
             break
         else:
             print("\nInvalid choice. Please try again.")
+
+
+#! Displays options available under Reports
+def reports_menu():
+    print("\n" + "-" * 40)
+    print("\n>>> REPORTS AND ANALYSIS <<<")
+    print("\n" + "-" * 40)
+
+    print("1. Farm Summary")
+    print("2. Crop Performance")
+    print("3. Expense Analysis")
+    print("4. Revenue and Profit/Loss")
+    print("5. Export Reports to CSV")
+    print("6. Generate Charts")
+    print("7. Back to Main Menu")
 
 
 #! Handles all Farmer Management operations
@@ -285,6 +302,28 @@ def revenue_management():
             print("\nInvalid choice. Please try again.")
 
 
+def report_management():
+    while True:
+        reports_menu()
+        report_choice = validators.get_non_empty_input("Enter Your Choice: ")
+        if report_choice == "1":
+            reports.farm_summary()
+        elif report_choice == "2":
+            reports.crop_performance()
+        elif report_choice == "3":
+            reports.expense_analysis()
+        elif report_choice == "4":
+            reports.revenue_profit_loss()
+        elif report_choice == "5":
+            print("\nCSV Export - Coming Soon")
+        elif report_choice == "6":
+            print("\nCharts - Coming Soon")
+        elif report_choice == "7":
+            break
+        else:
+            print("\nInvalid choice. Please select a number from 1 to 7.")
+
+
 #! Starts the application and controls the main menu flow
 def main():
     create_tables()
@@ -305,7 +344,7 @@ def main():
         elif choice == "6":
             harvest_revenue_menu()
         elif choice == "7":
-            print("\n>>> REPORTS AND ANALYSIS SELECTED <<<")
+            report_management()
         elif choice == "8":
             print("\nThank you for using the system!")
             break

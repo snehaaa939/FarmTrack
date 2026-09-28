@@ -1,3 +1,4 @@
+import csv
 from database import get_conn
 
 
@@ -7,41 +8,43 @@ def farm_summary():
     connection = get_conn()
     cursor = connection.cursor()
 
-    #! Total Number of Farmers
     query = "SELECT COUNT(*) FROM farmers"
     cursor.execute(query)
     total_farmers = cursor.fetchone()[0]
 
-    #! Total Number of Fields
     query = "SELECT COUNT(*) FROM fields"
     cursor.execute(query)
     total_fields = cursor.fetchone()[0]
 
-    #! Total Number of Crop_plans
     query = "SELECT COUNT(*) FROM crop_plans"
     cursor.execute(query)
     total_crop_plans = cursor.fetchone()[0]
 
-    #! Total Number of Farming_activities
     query = "SELECT COUNT(*) FROM activities"
     cursor.execute(query)
     total_activities = cursor.fetchone()[0]
 
-    #! Total Number of Expenses
     query = "SELECT COUNT(*) FROM expenses"
     cursor.execute(query)
     total_expenses = cursor.fetchone()[0]
 
-    #! Total Number of Harvests
     query = "SELECT COUNT(*) FROM harvests"
     cursor.execute(query)
     total_harvests = cursor.fetchone()[0]
 
-    #! Total Number of Revenues
     query = "SELECT COUNT(*) FROM revenues"
     cursor.execute(query)
     total_revenues = cursor.fetchone()[0]
 
+    summary = [
+        ["Farmers", total_farmers],
+        ["Fields", total_fields],
+        ["Crop Plans", total_crop_plans],
+        ["Activities", total_activities],
+        ["Expenses", total_expenses],
+        ["Harvests", total_harvests],
+        ["Revenues", total_revenues],
+    ]
     print(f"\nTotal Farmers  : {total_farmers}")
     print(f"Total Fields     : {total_fields}")
     print(f"Total Crop Plans : {total_crop_plans}")
@@ -51,12 +54,112 @@ def farm_summary():
     print(f"Total Revenues   : {total_revenues}")
 
     connection.close()
+    return summary
+
+
+def export_farm_summary(summary):
+    print("\n===== EXPORT FARM SUMMARY =====")
+    with open("exports/farm_summary.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(["Report", "Total"])
+        for item in summary:
+            writer.writerow(item)
+    print("\nFarm summary exported successfully.")
+    print("File saved at: exports/farm_summary.csv")
+
+
+def export_crop_performance(performance):
+    print("\n===== EXPORT CROP PERFORMANCE =====")
+
+    with open("exports/crop_performance.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+
+        writer.writerow(
+            [
+                "Crop ID",
+                "Crop Name",
+                "Farmer",
+                "Field",
+                "Total Expense",
+                "Total Harvest",
+                "Total Revenue",
+                "Profit/Loss",
+            ]
+        )
+
+        for crop in performance:
+            writer.writerow(crop)
+
+    print("\nCrop performance exported successfully.")
+    print("File saved at: exports/crop_performance.csv")
+
+
+def export_expense_analysis(expenses):
+    print("\n===== EXPORT EXPENSE ANALYSIS =====")
+
+    with open("exports/expense_analysis.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+
+        writer.writerow(["Farmer", "Crop", "Expense Type", "Total Expense"])
+
+        for expense in expenses:
+            writer.writerow(expense)
+
+    print("\nExpense analysis exported successfully.")
+    print("File saved at: exports/expense_analysis.csv")
+
+
+def export_revenue_profit_loss(revenue_data):
+    print("\n===== EXPORT REVENUE AND PROFIT/LOSS =====")
+
+    with open("exports/revenue_profit_loss.csv", "w", newline="") as file:
+        writer = csv.writer(file)
+
+        writer.writerow(
+            ["Farmer", "Crop", "Total Expense", "Total Revenue", "Profit/Loss"]
+        )
+
+        for record in revenue_data:
+            writer.writerow(record)
+
+    print("\nRevenue and profit/loss report exported successfully.")
+    print("File saved at: exports/revenue_profit_loss.csv")
+
+
+def export_reports():
+    while True:
+        print("\n===== EXPORT REPORTS =====")
+        print("1. Export Farm Summary")
+        print("2. Export Crop Performance")
+        print("3. Export Expense Analysis")
+        print("4. Export Revenue and Profit/Loss")
+        print("5. Back")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            summary = farm_summary()
+            export_farm_summary(summary)
+        elif choice == "2":
+            performance = crop_performance()
+            export_crop_performance(performance)
+        elif choice == "3":
+            expenses = expense_analysis()
+            export_expense_analysis(expenses)
+        elif choice == "4":
+            revenue_data = revenue_profit_loss()
+            export_revenue_profit_loss(revenue_data)
+        elif choice == "5":
+            break
+
+        else:
+            print("\nInvalid choice. Please select 1 to 5.")
 
 
 #!Crop Report
 def crop_performance():
     print("\n===== CROP PERFORMANCE =====")
-
+    performance = []
     connection = get_conn()
     cursor = connection.cursor()
 
@@ -67,8 +170,6 @@ def crop_performance():
             cp.crop_name,
             fr.name,
             f.field_name,
-            
-    #! Calculate total expense, total harvest and total revenue for each crop
             COALESCE(
                 (SELECT SUM(e.amount)
                  FROM expenses e
@@ -122,7 +223,18 @@ def crop_performance():
 
         #! Calculate profit or loss
         profit_loss = total_revenue - total_expense
-
+        performance.append(
+            [
+                crop_id,
+                crop_name,
+                farmer_name,
+                field_name,
+                total_expense,
+                total_harvest,
+                total_revenue,
+                profit_loss,
+            ]
+        )
         print("\n" + "-" * 40)
         print(f"Crop ID        : {crop_id}")
         print(f"Crop Name      : {crop_name}")
@@ -136,12 +248,13 @@ def crop_performance():
     print("-" * 40)
 
     connection.close()
+    return performance
 
 
 #! Expense Report
 def expense_analysis():
     print("\n===== EXPENSE ANALYSIS =====")
-
+    expenses = []
     connection = get_conn()
     cursor = connection.cursor()
 
@@ -164,11 +277,11 @@ def expense_analysis():
 
     cursor.execute(query)
 
-    #! Get all expense records
-    expenses = cursor.fetchall()
+    # Get all expense records
+    expense_records = cursor.fetchall()
 
-    #! Check if expense records exist
-    if not expenses:
+    # Check if expense records exist
+    if not expense_records:
         print("\nNo expense records found.")
         connection.close()
         return
@@ -178,25 +291,25 @@ def expense_analysis():
     crop_total = 0
     farmer_total = 0
 
-    #! Display expenses farmer-wise and crop-wise
-    for expense in expenses:
+    # Display expenses farmer-wise and crop-wise
+    for expense in expense_records:
 
         farmer_name = expense[0]
         crop_name = expense[1]
         expense_type = expense[2]
         amount = expense[3]
-
-        #! Check if farmer has changed
+        expenses.append([farmer_name, crop_name, expense_type, amount])
+        # Check if farmer has changed
         if farmer_name != current_farmer:
 
             if current_farmer is not None:
 
-                #! Display total for the previous crop
+                # Display total for the previous crop
                 if current_crop is not None:
                     print(f"Crop Total     : Rs. {crop_total:.2f}")
                     print()
 
-                #! Display total for the previous farmer
+                # Display total for the previous farmer
                 print(f"Farmer Total   : Rs. {farmer_total:.2f}")
                 print("-" * 40)
 
@@ -207,7 +320,7 @@ def expense_analysis():
             crop_total = 0
             farmer_total = 0
 
-        #! Check if crop has changed
+        # Check if crop has changed
         if crop_name != current_crop:
 
             if current_crop is not None:
@@ -222,7 +335,7 @@ def expense_analysis():
 
         print(f"{expense_type:<18}: Rs. {amount:.2f}")
 
-        #! Add expense amount to crop and farmer totals
+        # Add expense amount to crop and farmer totals
         crop_total = crop_total + amount
         farmer_total = farmer_total + amount
 
@@ -233,12 +346,13 @@ def expense_analysis():
         print(f"\nFarmer Total   : Rs. {farmer_total:.2f}")
 
     connection.close()
+    return expenses
 
 
 #! Revenue and Profit/Loss Report
 def revenue_profit_loss():
     print("\n===== REVENUE AND PROFIT/LOSS =====")
-
+    revenue_data = []
     connection = get_conn()
     cursor = connection.cursor()
 
@@ -312,6 +426,10 @@ def revenue_profit_loss():
 
         profit_loss = total_revenue - total_expense
 
+        revenue_data.append(
+            [farmer_name, crop_name, total_expense, total_revenue, profit_loss]
+        )
+
         print(f"\nCrop: {crop_name}")
         print("-" * 40)
         print(f"Total Expense : Rs. {total_expense:.2f}")
@@ -343,3 +461,10 @@ def revenue_profit_loss():
     print(f"Profit/Loss   : Rs. {farm_profit_loss:.2f}")
 
     connection.close()
+    return revenue_data
+
+
+summary = farm_summary()
+export_farm_summary(summary)
+performance = crop_performance()
+export_crop_performance(performance)

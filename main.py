@@ -315,7 +315,7 @@ def report_management():
         elif report_choice == "4":
             reports.revenue_profit_loss()
         elif report_choice == "5":
-            print("\nCSV Export - Coming Soon")
+            reports.export_reports()
         elif report_choice == "6":
             print("\nCharts - Coming Soon")
         elif report_choice == "7":

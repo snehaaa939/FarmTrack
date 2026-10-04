@@ -1,4 +1,6 @@
 import csv
+import matplotlib.pyplot as plt
+from pathlib import Path
 from database import get_conn
 
 
@@ -163,7 +165,7 @@ def crop_performance():
     connection = get_conn()
     cursor = connection.cursor()
 
-    #! Get Crop ID, Crop Name, Farmer Name and Field Name
+    # Get Crop ID, Crop Name, Farmer Name and Field Name
     query = """
         SELECT
             cp.crop_id,
@@ -258,7 +260,7 @@ def expense_analysis():
     connection = get_conn()
     cursor = connection.cursor()
 
-    #! Get farmer name, crop name, expense type and expense amount
+    # Get farmer name, crop name, expense type and expense amount
     query = """
         SELECT
             fr.name,
@@ -416,7 +418,7 @@ def revenue_profit_loss():
                 print(f"Farmer Profit/Loss   : Rs. {farmer_profit_loss:.2f}")
                 print("-" * 40)
 
-            #! Display new farmer
+            # Display new farmer
             print(f"\nFarmer: {farmer_name}")
 
             current_farmer = farmer_name
@@ -468,3 +470,250 @@ summary = farm_summary()
 export_farm_summary(summary)
 performance = crop_performance()
 export_crop_performance(performance)
+
+
+#! Chart Report
+def expense_by_crop_chart():
+    print("\n===== EXPENSE BY CROP CHART =====")
+
+    connection = get_conn()
+    cursor = connection.cursor()
+
+    # Get total expense for each crop
+    query = """
+        SELECT
+            cp.crop_name,
+            SUM(e.amount) AS total_expense
+        FROM expenses e
+        INNER JOIN crop_plans cp
+            ON e.crop_id = cp.crop_id
+        GROUP BY cp.crop_name
+        ORDER BY total_expense DESC
+    """
+
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    connection.close()
+
+    if not results:
+        print("\nNo expense data found.")
+        return
+
+    crop_names = []
+    total_expenses = []
+
+    for result in results:
+        crop_names.append(result[0])
+        total_expenses.append(result[1])
+
+    # Create the bar chart
+    plt.figure(figsize=(10, 6))
+    plt.bar(crop_names, total_expenses, color="#356B2F")
+    plt.title("Expense by Crop")
+    plt.xlabel("Crop")
+    plt.ylabel("Total Expense (Rs.)")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    Path("charts").mkdir(exist_ok=True)
+    plt.savefig("charts/expense_by_crop.png")
+    plt.close()
+
+    print("\nExpense by crop chart generated successfully.")
+    print("File saved at: charts/expense_by_crop.png")
+
+
+#! Revenue Chart
+def revenue_by_crop_chart():
+    print("\n===== REVENUE BY CROP CHART =====")
+
+    connection = get_conn()
+    cursor = connection.cursor()
+
+    # Get total revenue for each crop
+    query = """
+        SELECT
+            cp.crop_name,
+            SUM(r.total_amount) AS total_revenue
+        FROM revenues r
+        INNER JOIN crop_plans cp
+            ON r.crop_id = cp.crop_id
+        GROUP BY cp.crop_name
+        ORDER BY total_revenue DESC
+    """
+
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    connection.close()
+
+    if not results:
+        print("\nNo revenue data found.")
+        return
+
+    crop_names = []
+    total_revenues = []
+
+    for row in results:
+        crop_names.append(row[0])
+        total_revenues.append(row[1])
+
+    # Create the bar chart
+    plt.figure(figsize=(10, 6))
+
+    plt.bar(crop_names, total_revenues, color="#4F8A3D")
+
+    plt.title("Revenue by Crop")
+    plt.xlabel("Crop")
+    plt.ylabel("Total Revenue (Rs.)")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    Path("charts").mkdir(exist_ok=True)
+    plt.savefig("charts/revenue_by_crop.png")
+    plt.close()
+
+    print("\nRevenue by crop chart generated successfully.")
+    print("File saved at: charts/revenue_by_crop.png")
+
+
+#! Profit/Loss Chart
+def profit_loss_by_crop_chart():
+    print("\n===== PROFIT/LOSS BY CROP CHART =====")
+
+    connection = get_conn()
+    cursor = connection.cursor()
+
+    # Get total expense and total revenue for each crop
+    query = """
+        SELECT
+            cp.crop_name,
+            fr.name,
+
+            COALESCE(
+                (SELECT SUM(e.amount)
+                FROM expenses e
+                WHERE e.crop_id = cp.crop_id),
+                0
+            ) AS total_expense,
+
+            COALESCE(
+                (SELECT SUM(r.total_amount)
+                FROM revenues r
+                WHERE r.crop_id = cp.crop_id),
+                0
+            ) AS total_revenue
+
+        FROM crop_plans cp
+
+        INNER JOIN fields f
+            ON cp.field_id = f.field_id
+
+        INNER JOIN farmers fr
+            ON f.farmer_id = fr.farmer_id
+
+        ORDER BY cp.crop_id ASC
+    """
+
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    connection.close()
+
+    if not results:
+        print("\nNo crop data found.")
+        return
+
+    crop_names = []
+    profit_losses = []
+
+    # Calculate profit/loss for each crop
+    for row in results:
+        crop_name = row[0]
+        farmer_name = row[1]
+        total_expense = row[2]
+        total_revenue = row[3]
+
+        profit_loss = total_revenue - total_expense
+
+        crop_label = f"{crop_name} - {farmer_name}"
+
+        crop_names.append(crop_label)
+        profit_losses.append(profit_loss)
+
+    # Create the bar chart
+    plt.figure(figsize=(10, 6))
+    bars = plt.barh(crop_names, profit_losses, color="#6A994E")
+    plt.bar_label(bars, fmt="Rs. %.0f", padding=5)
+    # Add extra space for value labels
+    plt.xlim(0, max(profit_losses) * 1.15)
+    plt.title("Profit/Loss by Crop Plan")
+    plt.xlabel("Crop Plan")
+    plt.ylabel("Profit/Loss (Rs.)")
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+
+    Path("charts").mkdir(exist_ok=True)
+
+    plt.savefig("charts/profit_loss_by_crop.png")
+    plt.close()
+
+    print("\nProfit/Loss by crop chart generated successfully.")
+    print("File saved at: charts/profit_loss_by_crop.png")
+
+
+#! Expense Distribution Chart
+def expense_distribution_by_farmer_chart():
+    print("\n===== EXPENSE DISTRIBUTION BY FARMER CHART =====")
+
+    connection = get_conn()
+    cursor = connection.cursor()
+
+    # Get total expense for each farmer
+    query = """
+        SELECT
+            fr.name,
+            SUM(e.amount) AS total_expense
+        FROM expenses e
+        INNER JOIN crop_plans cp
+            ON e.crop_id = cp.crop_id
+        INNER JOIN fields f
+            ON cp.field_id = f.field_id
+        INNER JOIN farmers fr
+            ON f.farmer_id = fr.farmer_id
+        GROUP BY fr.farmer_id, fr.name
+        ORDER BY total_expense DESC
+    """
+
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    connection.close()
+    if not results:
+        print("\nNo expense data found.")
+        return
+
+    farmer_names = []
+    total_expenses = []
+
+    for result in results:
+        farmer_names.append(result[0])
+        total_expenses.append(result[1])
+
+    # Create the pie chart
+    plt.figure(figsize=(8, 8))
+    plt.pie(
+        total_expenses,
+        labels=farmer_names,
+        autopct="%1.1f%%",
+        startangle=90,
+        colors=["#4F8A3D", "#6A994E", "#C9A227"],
+    )
+    plt.title("Expense Distribution by Farmer")
+    plt.axis("equal")
+    plt.tight_layout()
+    Path("charts").mkdir(exist_ok=True)
+    plt.savefig("charts/expense_distribution_by_farmer.png")
+    plt.close()
+
+    print("\nExpense distribution by farmer chart generated successfully.")
+    print("File saved at: charts/expense_distribution_by_farmer.png")

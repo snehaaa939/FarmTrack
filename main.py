@@ -131,6 +131,19 @@ def reports_menu():
     print("7. Back to Main Menu")
 
 
+#! Displays options available under Charts Menu
+def charts_menu():
+    print("\n" + "-" * 40)
+    print("\n>>> GENERATE CHARTS <<<")
+    print("\n" + "-" * 40)
+
+    print("1. Expense by Crop")
+    print("2. Revenue by Crop")
+    print("3. Profit/Loss by Crop")
+    print("4. Expense Distribution by Farmer")
+    print("5. Back")
+
+
 #! Handles all Farmer Management operations
 def farmer_management():
     while True:
@@ -302,6 +315,7 @@ def revenue_management():
             print("\nInvalid choice. Please try again.")
 
 
+#! Handles all report management operations
 def report_management():
     while True:
         reports_menu()
@@ -317,11 +331,37 @@ def report_management():
         elif report_choice == "5":
             reports.export_reports()
         elif report_choice == "6":
-            print("\nCharts - Coming Soon")
+            chart_management()
         elif report_choice == "7":
             break
         else:
             print("\nInvalid choice. Please select a number from 1 to 7.")
+
+
+#! Handles all Chart Management Operations
+def chart_management():
+    while True:
+        charts_menu()
+
+        choice = validators.get_non_empty_input("Enter Your Choice: ")
+
+        if choice == "1":
+            reports.expense_by_crop_chart()
+
+        elif choice == "2":
+            reports.revenue_by_crop_chart()
+
+        elif choice == "3":
+            reports.profit_loss_by_crop_chart()
+
+        elif choice == "4":
+            reports.expense_distribution_by_farmer_chart()
+
+        elif choice == "5":
+            break
+
+        else:
+            print("\nInvalid choice. Please select a number from 1 to 5.")
 
 
 #! Starts the application and controls the main menu flow

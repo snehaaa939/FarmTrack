@@ -7,7 +7,7 @@ import validators
 #! Displays the main menu of the application
 def display_main_menu():
     print("\n" + "-" * 40)
-    print(" SMART CROP PLANNING AND FARM RECORD SYSTEM ")
+    print(" FarmTrack — Farm Record & Crop Planning System ")
     print("\n" + "-" * 40)
 
     print("1. Farmer Management")

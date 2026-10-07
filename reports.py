@@ -61,6 +61,7 @@ def farm_summary():
 
     return summary
 
+
 #! Crop Performance
 def crop_performance():
     print("\n===== CROP PERFORMANCE =====")

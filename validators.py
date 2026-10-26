@@ -98,8 +98,14 @@ def get_choice(prompt, choices):
 def get_date(prompt):
     while True:
         date = get_non_empty_input(prompt)
-        try:
-            datetime.strptime(date, "%Y-%m-%d")
+        if is_valid_date(date):
             return date
-        except ValueError:
-            print("Please Enter a valid date in YYYY-MM-DD format.")
+        print("Please Enter a valid date in YYYY-MM-DD format.")
+
+
+def is_valid_date(value):
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+        return True
+    except (TypeError, ValueError):
+        return False

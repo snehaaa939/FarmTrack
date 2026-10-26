@@ -1,4 +1,5 @@
 from datetime import datetime
+import sqlite3
 from database import get_conn
 import validators
 
@@ -37,6 +38,41 @@ def add_farmer():
     print("\nFarmer added successfully!")
 
 
+#! Add farmer from GUI
+def add_farmer_gui(name, phone, location):
+
+    connection = get_conn()
+    cursor = connection.cursor()
+
+    # Check whether phone number already exists
+    check_query = """
+        SELECT farmer_id
+        FROM farmers
+        WHERE phone = ?
+    """
+
+    cursor.execute(check_query, (phone,))
+
+    existing_farmer = cursor.fetchone()
+
+    if existing_farmer:
+        connection.close()
+        return False, "This phone number is already registered."
+
+    # Insert new farmer
+    add_query = """
+        INSERT INTO farmers (name, phone, location)
+        VALUES (?, ?, ?)
+    """
+
+    cursor.execute(add_query, (name, phone, location))
+
+    connection.commit()
+    connection.close()
+
+    return True, "Farmer added successfully!"
+
+
 #! Displays all farmers stored in the database
 def view_farmers():
     connection = get_conn()
@@ -60,6 +96,51 @@ def view_farmers():
             f"Phone: {farmer[2]} |"
             f"Location: {farmer[3]} |"
         )
+
+
+def get_all_farmers():
+    connection = get_conn()
+
+    try:
+        cursor = connection.cursor()
+        query = """
+            SELECT farmer_id, name, phone, location
+            FROM farmers
+            ORDER BY farmer_id
+        """
+        cursor.execute(query)
+        farmers = cursor.fetchall()
+        return farmers
+    finally:
+        connection.close()
+
+
+def delete_farmer_gui(farmer_id):
+    connection = get_conn()
+
+    try:
+        connection.execute("BEGIN IMMEDIATE")
+        cursor = connection.cursor()
+
+        cursor.execute(
+            "SELECT farmer_id FROM farmers WHERE farmer_id = ?",
+            (farmer_id,),
+        )
+        if cursor.fetchone() is None:
+            connection.rollback()
+            return False, "The selected farmer no longer exists."
+
+        cursor.execute("DELETE FROM farmers WHERE farmer_id = ?", (farmer_id,))
+        connection.commit()
+        return True, "Farmer and all associated records deleted successfully."
+    except sqlite3.IntegrityError:
+        connection.rollback()
+        return (
+            False,
+            "The farmer and associated records could not be deleted because a related record prevents deletion.",
+        )
+    finally:
+        connection.close()
 
 
 #! Searches for a farmer by name or phone number
